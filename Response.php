@@ -49,9 +49,9 @@ class Response
                 header($key . ': ' . $value);
             }
         }
-        /*if (!empty($this->body)) {
+        if (!empty($this->body)) {
             echo $this->body;
-        }*/
+        }
     }
 
 
