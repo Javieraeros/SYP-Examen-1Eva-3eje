@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="d47589bb-08ef-424c-9499-15c19d1581c6" name="Examen-Local" url="http://examen.dev">
+        <fileTransfer port="0" mountedRoot="/var/www/html/Examen" accessType="MOUNT" />
+      </webServer>
+    </option>
+  </component>
+</project>

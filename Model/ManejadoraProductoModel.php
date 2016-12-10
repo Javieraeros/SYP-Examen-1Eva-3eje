@@ -2,7 +2,7 @@
 
 require_once "DbNames.php";
 require_once "ProductoModel.php";
-
+//ToDo ¿Devolver lo que introducimos?
 class ManejadoraProductoModel
 {
 
@@ -139,7 +139,5 @@ class ManejadoraProductoModel
         return $resultado;
 
     }
-
-    
 
 }

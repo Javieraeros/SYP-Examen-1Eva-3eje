@@ -56,28 +56,31 @@ class ProductoController extends Controller
                 ,$request->getBodyParameters()->descripcion
                 ,$request->getBodyParameters()->precio
             );
+            //Si los datos son válidos
+            if($producto->getnombre()!="" and $producto->getprecio()>0){
+                /*Aquí decidimos si lo que tenemos que hacer es un put(actualización), en caso de que el sorteo exista
+                o un put(inserción) en caso de que el sorteo no exista*/
 
+                $existeSorteo = ManejadoraProductoModel::getProducto($id);
+                if ($existeSorteo != null) {
+                    $resultado = ManejadoraProductoModel::putProducto($producto);
+                } else {
+                    $resultado = ManejadoraProductoModel::postProducto($producto);
+                }
 
-            /*Aquí decidimos si lo que tenemos que hacer es un put(actualización), en caso de que el sorteo exista
-            o un put(inserción) en caso de que el sorteo no exista*/
-
-            $existeSorteo = ManejadoraProductoModel::getProducto($id);
-            if ($existeSorteo != null) {
-                $resultado = ManejadoraProductoModel::putProducto($producto);
-            } else {
-                $resultado = ManejadoraProductoModel::postProducto($producto);
+                if($resultado){
+                    $code='200';
+                }else{
+                    $code='405';
+                }
+            }else{
+                $code='422';
             }
-        }
-        if ($request != null) {
-            $code = '200';
-            if(!$resultado){
-                $code='405';
-            }
-        } else {
+        }else {
             $code = '400';
         }
 
-        $response = new Response($code, null, $resultado, $request->getAccept());
+        $response = new Response($code, null, null, $request->getAccept());
         $response->generate();
     }
 }
