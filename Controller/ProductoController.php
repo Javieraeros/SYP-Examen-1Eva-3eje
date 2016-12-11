@@ -8,15 +8,38 @@ class ProductoController extends Controller
 
         $listaProductos = null;
         $id = null;
+        $letra=null;
+        $precioMin=null;
+        $precioMax=null;
         $response = null;
         $code = null;
 
         if (isset($request->getUrlElements()[2])) {
             $id = $request->getUrlElements()[2];
         }
+        //Vemos si quiere filtrar por letra
+        if(isset($request->getQueryString()["letra"])){
+            $letra=$request->getQueryString()["letra"];
+            utf8_decode($letra);
+            $listaProductos=ManejadoraProductoModel::getProductoLetra($letra);
 
+        }else{
+            //Aquí tenemos que ver si quiere filtrar por precio mín, máx o ambos
+            $precioMin=$request->getQueryString()["preciomin"];
+            $precioMax=$request->getQueryString()["preciomax"];
 
-        $listaProductos = ManejadoraProductoModel::getProducto($id);
+            //Para evitar precios por debajo de 0€ tanto el precioMin como el máximo deberan ser mayor que 0
+            if(isset($precioMin) or isset($precioMax)){
+                //Pongo este if aquí, y no arriba, para evitar que teniendo una query string con preciomin
+                //y preciomax, llame a getProducto(id), por lo que no muestre mensaje de error
+                //si el precioMin es <0 o Preciomax<0
+                if($precioMin>=0 and $precioMax>=0){
+                    $listaProductos=ManejadoraProductoModel::getProductoPrecio($precioMin,$precioMax);
+                }
+            }else{
+                $listaProductos = ManejadoraProductoModel::getProducto($id);
+            }
+        }
 
         if ($listaProductos != null) {
             $code = '200';
@@ -25,8 +48,9 @@ class ProductoController extends Controller
 
             //We could send 404 in any case, but if we want more precission,
             //we can send 400 if the syntax of the entity was incorrect...
-            if (ManejadoraProductoModel::isValid($id)) {
-                $code = '404';
+            if (ManejadoraProductoModel::isValid($id) or ManejadoraProductoModel::isCharacter($letra) or
+                ($precioMin>=0 and $precioMax>=0 and $precioMin<=$precioMax)) {
+                $code = '204';
             } else {
                 $code = '400';
             }

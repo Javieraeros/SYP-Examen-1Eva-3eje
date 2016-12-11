@@ -64,11 +64,114 @@ class ManejadoraProductoModel
         return $listaProducto;
     }
 
+    public static function getProductoLetra($letra)
+    {
+        $listaProducto = null;
+
+        $db = DatabaseModel::getInstance();
+        $db_connection = $db->getConnection();
+        if(self::isCharacter($letra)){
+            $query = "SELECT " . \ConstantesDB\ConsProductos::cod . ","
+                . \ConstantesDB\ConsProductos::nombre.","
+                . \ConstantesDB\ConsProductos::descripcion.","
+                . \ConstantesDB\ConsProductos::precio . " FROM "
+                . \ConstantesDB\ConsProductos::TABLE_NAME.
+                " Where ". \ConstantesDB\ConsProductos::nombre.
+                " like '".$letra."%'";
+
+
+            $prep_query = $db_connection->prepare($query);
+
+            $listaProducto = array();
+
+
+            $prep_query->execute();
+
+            $prep_query->bind_result($cod,$nombre,$descripcion,$precio);
+
+            //Necesario para que no pete cuando hago varias consultas
+            $prep_query->store_result();
+
+            while ($prep_query->fetch()) {
+                $nombre=utf8_encode($nombre);
+                $descripcion=utf8_encode($descripcion);
+
+                $producto = new ProductoModel($cod,$nombre,$descripcion,$precio);
+                $listaProducto[] = $producto;
+            }
+        }
+
+
+        $db->closeConnection();
+
+        return $listaProducto;
+    }
+
+    public static function getProductoPrecio($min,$max)
+    {
+        $listaProducto = null;
+
+        $db = DatabaseModel::getInstance();
+        $db_connection = $db->getConnection();
+        $query="SELECT " . \ConstantesDB\ConsProductos::cod . ","
+            . \ConstantesDB\ConsProductos::nombre.","
+            . \ConstantesDB\ConsProductos::descripcion.","
+            . \ConstantesDB\ConsProductos::precio . " FROM "
+            . \ConstantesDB\ConsProductos::TABLE_NAME;
+
+        if(isset($min)){
+            $query=$query." where ". \ConstantesDB\ConsProductos::precio.
+                " >= ".$min;
+            if(isset($max)){
+                $query=$query." and ". \ConstantesDB\ConsProductos::precio.
+                    " <= ". $max;
+            }
+        }else{
+            $query=$query." where ". \ConstantesDB\ConsProductos::precio.
+                " <= ".$max;
+        }
+
+        $prep_query = $db_connection->prepare($query);
+
+        $listaProducto = array();
+
+
+        $prep_query->execute();
+
+        $prep_query->bind_result($cod,$nombre,$descripcion,$precio);
+
+        //Necesario para que no pete cuando hago varias consultas
+        $prep_query->store_result();
+
+        while ($prep_query->fetch()) {
+            $nombre=utf8_encode($nombre);
+            $descripcion=utf8_encode($descripcion);
+
+            $producto = new ProductoModel($cod,$nombre,$descripcion,$precio);
+            $listaProducto[] = $producto;
+        }
+
+
+
+        $db->closeConnection();
+
+        return $listaProducto;
+    }
+
     public static function isValid($id)
     {
         $res = false;
 
         if (ctype_digit($id)) {
+            $res = true;
+        }
+        return $res;
+    }
+    public static function isCharacter($letra)
+    {
+        $res = false;
+
+        if ($letra!=null and substr($letra,0,1)==$letra) {
             $res = true;
         }
         return $res;
